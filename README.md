@@ -1,5 +1,7 @@
 # NetBox Cisco ISE Plugin
 
+<img src="docs/icon.png" alt="NetBox Cisco ISE Plugin" width="100" align="right">
+
 A NetBox plugin that integrates Cisco Identity Services Engine (ISE) with NetBox, displaying endpoint details, network device (NAD) information, and active session data.
 
 ![NetBox Version](https://img.shields.io/badge/NetBox-4.0+-blue)
