@@ -34,7 +34,7 @@
                         {% if session_data.authorization_profile %}
                         <div class="mt-1">
                             <span class="text-muted">Authorization:</span>
-                            <span class="badge bg-info ms-2">{{ session_data.authorization_profile }}</span>
+                            <span class="badge bg-info text-dark ms-2">{{ session_data.authorization_profile }}</span>
                         </div>
                         {% endif %}
                         {% if session_data.acct_session_time %}
@@ -82,9 +82,9 @@
                                 <th class="text-muted">Static Assignment:</th>
                                 <td>
                                     {% if ise_data.static_group_assignment %}
-                                    <span class="badge bg-success">Yes</span>
+                                    <span class="badge bg-success text-white">Yes</span>
                                     {% else %}
-                                    <span class="badge bg-secondary">No</span>
+                                    <span class="badge bg-secondary text-white">No</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -143,7 +143,7 @@
                             {% if session_data.security_group %}
                             <tr>
                                 <th class="text-muted">Security Group:</th>
-                                <td><span class="badge bg-primary">{{ session_data.security_group }}</span></td>
+                                <td><span class="badge bg-primary text-white">{{ session_data.security_group }}</span></td>
                             </tr>
                             {% endif %}
                         </table>

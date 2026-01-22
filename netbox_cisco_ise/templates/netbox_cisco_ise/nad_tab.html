@@ -33,7 +33,7 @@
                         {% if ise_data.profile_name %}
                         <div class="mt-1">
                             <span class="text-muted">Profile:</span>
-                            <span class="badge bg-info ms-2">{{ ise_data.profile_name }}</span>
+                            <span class="badge bg-info text-dark ms-2">{{ ise_data.profile_name }}</span>
                         </div>
                         {% endif %}
                     </div>
@@ -103,9 +103,9 @@
                                 <th class="text-muted" style="width: 50%">RADIUS:</th>
                                 <td>
                                     {% if ise_data.authentication_settings.radius_enabled %}
-                                    <span class="badge bg-success">Enabled</span>
+                                    <span class="badge bg-success text-white">Enabled</span>
                                     {% else %}
-                                    <span class="badge bg-secondary">Disabled</span>
+                                    <span class="badge bg-warning text-dark">Disabled</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -113,9 +113,9 @@
                                 <th class="text-muted">TACACS+:</th>
                                 <td>
                                     {% if ise_data.tacacs_settings.enabled %}
-                                    <span class="badge bg-success">Enabled</span>
+                                    <span class="badge bg-success text-white">Enabled</span>
                                     {% else %}
-                                    <span class="badge bg-secondary">Disabled</span>
+                                    <span class="badge bg-warning text-dark">Disabled</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -123,9 +123,9 @@
                                 <th class="text-muted">TrustSec:</th>
                                 <td>
                                     {% if ise_data.trustsec_enabled %}
-                                    <span class="badge bg-success">Enabled</span>
+                                    <span class="badge bg-success text-white">Enabled</span>
                                     {% else %}
-                                    <span class="badge bg-secondary">Disabled</span>
+                                    <span class="badge bg-warning text-dark">Disabled</span>
                                     {% endif %}
                                 </td>
                             </tr>
