@@ -357,9 +357,7 @@ class ISEClient:
                 "ro_community": bool(snmp_settings.get("roCommunity")),
                 "polling_interval": snmp_settings.get("pollingInterval"),
             },
-            "trustsec_enabled": bool(
-                trustsec_settings.get("deviceAuthenticationSettings", {}).get("sgaDeviceId")
-            ),
+            "trustsec_enabled": bool(trustsec_settings.get("deviceAuthenticationSettings", {}).get("sgaDeviceId")),
             "coA_port": nad.get("coaPort"),
             "cached": False,
         }
