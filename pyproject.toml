@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "netbox-cisco-ise"
-version = "0.1.0"
+version = "0.1.1"
 description = "NetBox plugin for Cisco ISE integration - endpoint tracking, NAD management, and session visibility"
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -45,6 +45,9 @@ dev = [
 
 [tool.setuptools.packages.find]
 include = ["netbox_cisco_ise*"]
+
+[tool.setuptools.package-data]
+netbox_cisco_ise = ["templates/**/*.html"]
 
 [tool.black]
 line-length = 120
