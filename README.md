@@ -43,7 +43,7 @@ A NetBox plugin that integrates Cisco Identity Services Engine (ISE) with NetBox
 
 ## Installation
 
-### From PyPI (when published)
+### From PyPI (recommended)
 
 ```bash
 pip install netbox-cisco-ise
