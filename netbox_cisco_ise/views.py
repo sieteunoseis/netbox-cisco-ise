@@ -134,9 +134,7 @@ class DeviceISEView(generic.ObjectView):
 
     def get(self, request, pk):
         """Handle GET request for the ISE tab."""
-        device = Device.objects.select_related(
-            'device_type__manufacturer'
-        ).prefetch_related('interfaces').get(pk=pk)
+        device = Device.objects.select_related("device_type__manufacturer").prefetch_related("interfaces").get(pk=pk)
 
         client = get_client()
         config = settings.PLUGINS_CONFIG.get("netbox_cisco_ise", {})
