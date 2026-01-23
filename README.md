@@ -1,6 +1,6 @@
 # NetBox Cisco ISE Plugin
 
-<img src="docs/icon.png" alt="NetBox Cisco ISE Plugin" width="100" align="right">
+<img src="https://raw.githubusercontent.com/sieteunoseis/netbox-cisco-ise/main/docs/icon.png" alt="NetBox Cisco ISE Plugin" width="100" align="right">
 
 A NetBox plugin that integrates Cisco Identity Services Engine (ISE) with NetBox, displaying endpoint details, network device (NAD) information, and active session data.
 
