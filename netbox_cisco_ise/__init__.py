@@ -7,7 +7,7 @@ Shows endpoint identity, profiling data, active session status, and network acce
 
 from netbox.plugins import PluginConfig
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 
 class CiscoISEConfig(PluginConfig):

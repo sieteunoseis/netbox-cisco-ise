@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-01-26
+
+### Added
+
+- **Virtual Chassis Support**
+  - For Virtual Chassis members, NAD lookups now use the chassis name (original hostname) instead of member-specific name
+  - Example: Member "switch.2" queries ISE using "switch" to find the NAD
+
 ## [0.1.3] - 2025-01-23
 
 ### Fixed
