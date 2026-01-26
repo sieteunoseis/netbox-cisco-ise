@@ -49,7 +49,10 @@ class CiscoISEConfig(PluginConfig):
         #     {"manufacturer": "cisco", "device_type": ".*phone.*", "lookup": "endpoint"},  # Cisco phones by MAC
         # ]
         "device_mappings": [
-            {"manufacturer": r"cisco", "lookup": "nad"},  # Default: Cisco devices as NADs
+            {
+                "manufacturer": r"cisco",
+                "lookup": "nad",
+            },  # Default: Cisco devices as NADs
         ],
     }
 

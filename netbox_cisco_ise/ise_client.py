@@ -275,7 +275,9 @@ class ISEClient:
             cached["cached"] = True
             return cached
 
-        result = self._make_ers_request("/networkdevice", params={"filter": f"ipaddress.EQ.{ip_address}"})
+        result = self._make_ers_request(
+            "/networkdevice", params={"filter": f"ipaddress.EQ.{ip_address}"}
+        )
 
         return self._process_nad_result(result, cache_key)
 
@@ -295,7 +297,9 @@ class ISEClient:
             cached["cached"] = True
             return cached
 
-        result = self._make_ers_request("/networkdevice", params={"filter": f"name.CONTAINS.{name}"})
+        result = self._make_ers_request(
+            "/networkdevice", params={"filter": f"name.CONTAINS.{name}"}
+        )
 
         return self._process_nad_result(result, cache_key)
 
@@ -308,7 +312,11 @@ class ISEClient:
         resources = search_result.get("resources", [])
 
         if not resources:
-            return {"error": "Network device not found in ISE", "not_found": True, "is_nad": False}
+            return {
+                "error": "Network device not found in ISE",
+                "not_found": True,
+                "is_nad": False,
+            }
 
         # Get full NAD details
         nad_id = resources[0].get("id")
@@ -357,7 +365,11 @@ class ISEClient:
                 "ro_community": bool(snmp_settings.get("roCommunity")),
                 "polling_interval": snmp_settings.get("pollingInterval"),
             },
-            "trustsec_enabled": bool(trustsec_settings.get("deviceAuthenticationSettings", {}).get("sgaDeviceId")),
+            "trustsec_enabled": bool(
+                trustsec_settings.get("deviceAuthenticationSettings", {}).get(
+                    "sgaDeviceId"
+                )
+            ),
             "coA_port": nad.get("coaPort"),
             "cached": False,
         }

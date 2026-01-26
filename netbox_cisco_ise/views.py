@@ -51,10 +51,18 @@ def get_device_lookup_method(device):
 
     # Get device info for matching
     manufacturer = device.device_type.manufacturer
-    manufacturer_slug = manufacturer.slug.lower() if manufacturer and manufacturer.slug else ""
-    manufacturer_name = manufacturer.name.lower() if manufacturer and manufacturer.name else ""
-    device_type_slug = device.device_type.slug.lower() if device.device_type.slug else ""
-    device_type_model = device.device_type.model.lower() if device.device_type.model else ""
+    manufacturer_slug = (
+        manufacturer.slug.lower() if manufacturer and manufacturer.slug else ""
+    )
+    manufacturer_name = (
+        manufacturer.name.lower() if manufacturer and manufacturer.name else ""
+    )
+    device_type_slug = (
+        device.device_type.slug.lower() if device.device_type.slug else ""
+    )
+    device_type_model = (
+        device.device_type.model.lower() if device.device_type.model else ""
+    )
 
     # Check each mapping
     for mapping in mappings:
@@ -66,12 +74,15 @@ def get_device_lookup_method(device):
         manufacturer_match = False
         if manufacturer_pattern:
             try:
-                if re.search(manufacturer_pattern, manufacturer_slug, re.IGNORECASE) or re.search(
-                    manufacturer_pattern, manufacturer_name, re.IGNORECASE
-                ):
+                if re.search(
+                    manufacturer_pattern, manufacturer_slug, re.IGNORECASE
+                ) or re.search(manufacturer_pattern, manufacturer_name, re.IGNORECASE):
                     manufacturer_match = True
             except re.error:
-                if manufacturer_pattern in manufacturer_slug or manufacturer_pattern in manufacturer_name:
+                if (
+                    manufacturer_pattern in manufacturer_slug
+                    or manufacturer_pattern in manufacturer_name
+                ):
                     manufacturer_match = True
 
         if not manufacturer_match:
@@ -81,12 +92,15 @@ def get_device_lookup_method(device):
         if device_type_pattern:
             device_type_match = False
             try:
-                if re.search(device_type_pattern, device_type_slug, re.IGNORECASE) or re.search(
-                    device_type_pattern, device_type_model, re.IGNORECASE
-                ):
+                if re.search(
+                    device_type_pattern, device_type_slug, re.IGNORECASE
+                ) or re.search(device_type_pattern, device_type_model, re.IGNORECASE):
                     device_type_match = True
             except re.error:
-                if device_type_pattern in device_type_slug or device_type_pattern in device_type_model:
+                if (
+                    device_type_pattern in device_type_slug
+                    or device_type_pattern in device_type_model
+                ):
                     device_type_match = True
 
             if not device_type_match:
@@ -134,7 +148,11 @@ class DeviceISEView(generic.ObjectView):
 
     def get(self, request, pk):
         """Handle GET request for the ISE tab."""
-        device = Device.objects.select_related("device_type__manufacturer").prefetch_related("interfaces").get(pk=pk)
+        device = (
+            Device.objects.select_related("device_type__manufacturer")
+            .prefetch_related("interfaces")
+            .get(pk=pk)
+        )
 
         client = get_client()
         config = settings.PLUGINS_CONFIG.get("netbox_cisco_ise", {})
@@ -156,7 +174,10 @@ class DeviceISEView(generic.ObjectView):
                     if "error" not in ise_data:
                         # Also get session data for connected endpoints
                         session_data = client.get_active_session_by_mac(mac_address)
-                        if "error" in session_data and session_data.get("connected") is False:
+                        if (
+                            "error" in session_data
+                            and session_data.get("connected") is False
+                        ):
                             # Not connected is fine, just no active session
                             pass
                     else:
@@ -177,8 +198,14 @@ class DeviceISEView(generic.ObjectView):
                     ise_data = client.get_network_device_by_ip(management_ip)
 
                 # If IP lookup failed or no IP, try hostname
-                if ("error" in ise_data or not ise_data) and device.name:
-                    ise_data = client.get_network_device_by_name(device.name)
+                # Use VC name for virtual chassis members (original hostname)
+                lookup_hostname = (
+                    device.virtual_chassis.name
+                    if device.virtual_chassis
+                    else device.name
+                )
+                if ("error" in ise_data or not ise_data) and lookup_hostname:
+                    ise_data = client.get_network_device_by_name(lookup_hostname)
 
                 if "error" in ise_data:
                     error = ise_data.get("error")
