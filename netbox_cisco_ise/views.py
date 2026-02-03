@@ -9,8 +9,10 @@ import re
 
 from dcim.models import Device
 from django.conf import settings
-from django.http import JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.views import View
 from netbox.views import generic
 from utilities.views import ViewTab, register_model_view
@@ -133,10 +135,10 @@ def should_show_ise_tab(device):
 
 @register_model_view(Device, name="cisco_ise", path="cisco-ise")
 class DeviceISEView(generic.ObjectView):
-    """Display Cisco ISE endpoint/NAD details for a Device."""
+    """Display Cisco ISE endpoint/NAD details for a Device with async loading."""
 
     queryset = Device.objects.all()
-    template_name = "netbox_cisco_ise/endpoint_tab.html"
+    template_name = "netbox_cisco_ise/device_tab.html"
 
     tab = ViewTab(
         label="Cisco ISE",
@@ -147,7 +149,26 @@ class DeviceISEView(generic.ObjectView):
     )
 
     def get(self, request, pk):
-        """Handle GET request for the ISE tab."""
+        """Render initial tab with loading spinner - content loads via htmx."""
+        device = Device.objects.get(pk=pk)
+        return render(
+            request,
+            self.template_name,
+            {
+                "object": device,
+                "tab": self.tab,
+                "loading": True,
+            },
+        )
+
+
+class DeviceISEContentView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    """HTMX endpoint that returns ISE content for async loading."""
+
+    permission_required = "dcim.view_device"
+
+    def get(self, request, pk):
+        """Fetch ISE data and return HTML content."""
         device = (
             Device.objects.select_related("device_type__manufacturer")
             .prefetch_related("interfaces")
@@ -218,21 +239,22 @@ class DeviceISEView(generic.ObjectView):
 
         # Choose template based on lookup type
         if ise_data.get("is_nad"):
-            template = "netbox_cisco_ise/nad_tab.html"
+            template = "netbox_cisco_ise/nad_tab_content.html"
         else:
-            template = self.template_name
+            template = "netbox_cisco_ise/endpoint_tab_content.html"
 
-        return render(
-            request,
-            template,
-            {
-                "object": device,
-                "tab": self.tab,
-                "ise_data": ise_data,
-                "session_data": session_data,
-                "error": error,
-                "ise_url": ise_url,
-            },
+        return HttpResponse(
+            render_to_string(
+                template,
+                {
+                    "object": device,
+                    "ise_data": ise_data,
+                    "session_data": session_data,
+                    "error": error,
+                    "ise_url": ise_url,
+                },
+                request=request,
+            )
         )
 
 
