@@ -79,18 +79,18 @@ class CiscoISEConfig(PluginConfig):
     def _register_endpoint_views(self):
         """Register Cisco ISE tab for Endpoints if plugin is installed."""
         try:
-            from netbox_endpoints.models import Endpoint
-            from utilities.views import ViewTab, register_model_view
-            from netbox.views import generic
             from django.shortcuts import render
+            from netbox.views import generic
+            from netbox_endpoints.models import Endpoint
+
+            # Check if already registered
+            from utilities.views import ViewTab, register_model_view, registry
 
             from .views import should_show_ise_tab_endpoint
 
-            # Check if already registered
-            from utilities.views import registry
-            views_dict = registry.get('views', {})
-            endpoint_views = views_dict.get('netbox_endpoints', {}).get('endpoint', [])
-            if any(v.get('name') == 'cisco_ise' for v in endpoint_views):
+            views_dict = registry.get("views", {})
+            endpoint_views = views_dict.get("netbox_endpoints", {}).get("endpoint", [])
+            if any(v.get("name") == "cisco_ise" for v in endpoint_views):
                 return  # Already registered
 
             @register_model_view(Endpoint, name="cisco_ise", path="cisco-ise")

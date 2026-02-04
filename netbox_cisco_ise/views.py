@@ -22,6 +22,7 @@ from .ise_client import get_client
 # Check if netbox_endpoints plugin is installed
 try:
     from netbox_endpoints.models import Endpoint
+
     ENDPOINTS_PLUGIN_INSTALLED = True
 except ImportError:
     ENDPOINTS_PLUGIN_INSTALLED = False
@@ -60,18 +61,10 @@ def get_device_lookup_method(device):
 
     # Get device info for matching
     manufacturer = device.device_type.manufacturer
-    manufacturer_slug = (
-        manufacturer.slug.lower() if manufacturer and manufacturer.slug else ""
-    )
-    manufacturer_name = (
-        manufacturer.name.lower() if manufacturer and manufacturer.name else ""
-    )
-    device_type_slug = (
-        device.device_type.slug.lower() if device.device_type.slug else ""
-    )
-    device_type_model = (
-        device.device_type.model.lower() if device.device_type.model else ""
-    )
+    manufacturer_slug = manufacturer.slug.lower() if manufacturer and manufacturer.slug else ""
+    manufacturer_name = manufacturer.name.lower() if manufacturer and manufacturer.name else ""
+    device_type_slug = device.device_type.slug.lower() if device.device_type.slug else ""
+    device_type_model = device.device_type.model.lower() if device.device_type.model else ""
 
     # Check each mapping
     for mapping in mappings:
@@ -83,15 +76,12 @@ def get_device_lookup_method(device):
         manufacturer_match = False
         if manufacturer_pattern:
             try:
-                if re.search(
-                    manufacturer_pattern, manufacturer_slug, re.IGNORECASE
-                ) or re.search(manufacturer_pattern, manufacturer_name, re.IGNORECASE):
+                if re.search(manufacturer_pattern, manufacturer_slug, re.IGNORECASE) or re.search(
+                    manufacturer_pattern, manufacturer_name, re.IGNORECASE
+                ):
                     manufacturer_match = True
             except re.error:
-                if (
-                    manufacturer_pattern in manufacturer_slug
-                    or manufacturer_pattern in manufacturer_name
-                ):
+                if manufacturer_pattern in manufacturer_slug or manufacturer_pattern in manufacturer_name:
                     manufacturer_match = True
 
         if not manufacturer_match:
@@ -101,15 +91,12 @@ def get_device_lookup_method(device):
         if device_type_pattern:
             device_type_match = False
             try:
-                if re.search(
-                    device_type_pattern, device_type_slug, re.IGNORECASE
-                ) or re.search(device_type_pattern, device_type_model, re.IGNORECASE):
+                if re.search(device_type_pattern, device_type_slug, re.IGNORECASE) or re.search(
+                    device_type_pattern, device_type_model, re.IGNORECASE
+                ):
                     device_type_match = True
             except re.error:
-                if (
-                    device_type_pattern in device_type_slug
-                    or device_type_pattern in device_type_model
-                ):
+                if device_type_pattern in device_type_slug or device_type_pattern in device_type_model:
                     device_type_match = True
 
             if not device_type_match:
@@ -176,11 +163,7 @@ class DeviceISEContentView(LoginRequiredMixin, PermissionRequiredMixin, View):
 
     def get(self, request, pk):
         """Fetch ISE data and return HTML content."""
-        device = (
-            Device.objects.select_related("device_type__manufacturer")
-            .prefetch_related("interfaces")
-            .get(pk=pk)
-        )
+        device = Device.objects.select_related("device_type__manufacturer").prefetch_related("interfaces").get(pk=pk)
 
         client = get_client()
         config = settings.PLUGINS_CONFIG.get("netbox_cisco_ise", {})
@@ -202,10 +185,7 @@ class DeviceISEContentView(LoginRequiredMixin, PermissionRequiredMixin, View):
                     if "error" not in ise_data:
                         # Also get session data for connected endpoints
                         session_data = client.get_active_session_by_mac(mac_address)
-                        if (
-                            "error" in session_data
-                            and session_data.get("connected") is False
-                        ):
+                        if "error" in session_data and session_data.get("connected") is False:
                             # Not connected is fine, just no active session
                             pass
                     else:
@@ -227,11 +207,7 @@ class DeviceISEContentView(LoginRequiredMixin, PermissionRequiredMixin, View):
 
                 # If IP lookup failed or no IP, try hostname
                 # Use VC name for virtual chassis members (original hostname)
-                lookup_hostname = (
-                    device.virtual_chassis.name
-                    if device.virtual_chassis
-                    else device.name
-                )
+                lookup_hostname = device.virtual_chassis.name if device.virtual_chassis else device.name
                 if ("error" in ise_data or not ise_data) and lookup_hostname:
                     ise_data = client.get_network_device_by_name(lookup_hostname)
 
@@ -347,8 +323,9 @@ def should_show_ise_tab_endpoint(endpoint):
         manufacturer_match = False
         if manufacturer_pattern:
             try:
-                if re.search(manufacturer_pattern, manufacturer_slug, re.IGNORECASE) or \
-                   re.search(manufacturer_pattern, manufacturer_name, re.IGNORECASE):
+                if re.search(manufacturer_pattern, manufacturer_slug, re.IGNORECASE) or re.search(
+                    manufacturer_pattern, manufacturer_name, re.IGNORECASE
+                ):
                     manufacturer_match = True
             except re.error:
                 if manufacturer_pattern in manufacturer_slug or manufacturer_pattern in manufacturer_name:
@@ -361,8 +338,9 @@ def should_show_ise_tab_endpoint(endpoint):
         if endpoint_type_pattern:
             endpoint_type_match = False
             try:
-                if re.search(endpoint_type_pattern, endpoint_type_slug, re.IGNORECASE) or \
-                   re.search(endpoint_type_pattern, endpoint_type_model, re.IGNORECASE):
+                if re.search(endpoint_type_pattern, endpoint_type_slug, re.IGNORECASE) or re.search(
+                    endpoint_type_pattern, endpoint_type_model, re.IGNORECASE
+                ):
                     endpoint_type_match = True
             except re.error:
                 if endpoint_type_pattern in endpoint_type_slug or endpoint_type_pattern in endpoint_type_model:

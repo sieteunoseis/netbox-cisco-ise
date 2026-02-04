@@ -4,7 +4,7 @@ URL routing for NetBox Cisco ISE Plugin
 
 from django.urls import path
 
-from .views import DeviceISEContentView, ISESettingsView, TestConnectionView, ENDPOINTS_PLUGIN_INSTALLED
+from .views import ENDPOINTS_PLUGIN_INSTALLED, DeviceISEContentView, ISESettingsView, TestConnectionView
 
 urlpatterns = [
     path("settings/", ISESettingsView.as_view(), name="settings"),
