@@ -5,9 +5,13 @@ Display Cisco Identity Services Engine (ISE) endpoint and NAD information in Dev
 Shows endpoint identity, profiling data, active session status, and network access device details.
 """
 
+import logging
+
 from netbox.plugins import PluginConfig
 
-__version__ = "0.1.5"
+__version__ = "0.1.6"
+
+logger = logging.getLogger(__name__)
 
 
 class CiscoISEConfig(PluginConfig):
@@ -54,7 +58,73 @@ class CiscoISEConfig(PluginConfig):
                 "lookup": "nad",
             },  # Default: Cisco devices as NADs
         ],
+        # Endpoint mappings (requires netbox-endpoints plugin)
+        # Format: list of dicts with manufacturer (regex), endpoint_type (regex, optional)
+        # All endpoints use MAC lookup since they're endpoint devices
+        #
+        # Example:
+        # "endpoint_mappings": [
+        #     {"manufacturer": "vocera"},  # All Vocera endpoints
+        #     {"manufacturer": "cisco", "endpoint_type": ".*phone.*"},  # Cisco phones
+        # ]
+        # If empty, shows tab for ALL endpoints with a MAC address
+        "endpoint_mappings": [],
     }
+
+    def ready(self):
+        """Register endpoint view if netbox_endpoints is available."""
+        super().ready()
+        self._register_endpoint_views()
+
+    def _register_endpoint_views(self):
+        """Register Cisco ISE tab for Endpoints if plugin is installed."""
+        try:
+            from netbox_endpoints.models import Endpoint
+            from utilities.views import ViewTab, register_model_view
+            from netbox.views import generic
+            from django.shortcuts import render
+
+            from .views import should_show_ise_tab_endpoint
+
+            # Check if already registered
+            from utilities.views import registry
+            views_dict = registry.get('views', {})
+            endpoint_views = views_dict.get('netbox_endpoints', {}).get('endpoint', [])
+            if any(v.get('name') == 'cisco_ise' for v in endpoint_views):
+                return  # Already registered
+
+            @register_model_view(Endpoint, name="cisco_ise", path="cisco-ise")
+            class EndpointISEView(generic.ObjectView):
+                """Display Cisco ISE endpoint details for a netbox Endpoint."""
+
+                queryset = Endpoint.objects.all()
+                template_name = "netbox_cisco_ise/netbox_endpoint_tab.html"
+
+                tab = ViewTab(
+                    label="Cisco ISE",
+                    weight=9001,
+                    permission="netbox_endpoints.view_endpoint",
+                    hide_if_empty=False,
+                    visible=should_show_ise_tab_endpoint,
+                )
+
+                def get(self, request, pk):
+                    endpoint = Endpoint.objects.get(pk=pk)
+                    return render(
+                        request,
+                        self.template_name,
+                        {
+                            "object": endpoint,
+                            "tab": self.tab,
+                            "loading": True,
+                        },
+                    )
+
+            logger.info("Registered Cisco ISE tab for Endpoint model")
+        except ImportError:
+            logger.debug("netbox_endpoints not installed, skipping endpoint view registration")
+        except Exception as e:
+            logger.warning(f"Could not register endpoint views: {e}")
 
 
 config = CiscoISEConfig

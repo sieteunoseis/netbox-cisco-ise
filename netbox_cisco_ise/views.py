@@ -19,6 +19,13 @@ from utilities.views import ViewTab, register_model_view
 
 from .ise_client import get_client
 
+# Check if netbox_endpoints plugin is installed
+try:
+    from netbox_endpoints.models import Endpoint
+    ENDPOINTS_PLUGIN_INSTALLED = True
+except ImportError:
+    ENDPOINTS_PLUGIN_INSTALLED = False
+
 
 def is_valid_mac(value):
     """Check if a value looks like a MAC address."""
@@ -298,3 +305,128 @@ class TestConnectionView(View):
             return JsonResponse(result, status=400)
 
         return JsonResponse(result)
+
+
+# Endpoint-specific functions for netbox_endpoints plugin
+def should_show_ise_tab_endpoint(endpoint):
+    """
+    Determine if the ISE tab should be visible for this endpoint.
+
+    Shows tab if endpoint has a MAC address and matches configured endpoint_mappings
+    (or if endpoint_mappings is empty, show for all endpoints with MAC).
+    """
+    if not ENDPOINTS_PLUGIN_INSTALLED:
+        return False
+
+    # Must have MAC address for ISE lookup
+    if not endpoint.mac_address:
+        return False
+
+    config = settings.PLUGINS_CONFIG.get("netbox_cisco_ise", {})
+    mappings = config.get("endpoint_mappings", [])
+
+    # If no mappings configured, show for all endpoints with MAC
+    if not mappings:
+        return True
+
+    # Check if endpoint matches any mapping
+    if not endpoint.endpoint_type:
+        return False
+
+    manufacturer = endpoint.endpoint_type.manufacturer
+    manufacturer_slug = manufacturer.slug.lower() if manufacturer and manufacturer.slug else ""
+    manufacturer_name = manufacturer.name.lower() if manufacturer and manufacturer.name else ""
+    endpoint_type_slug = endpoint.endpoint_type.slug.lower() if endpoint.endpoint_type.slug else ""
+    endpoint_type_model = endpoint.endpoint_type.model.lower() if endpoint.endpoint_type.model else ""
+
+    for mapping in mappings:
+        manufacturer_pattern = mapping.get("manufacturer", "").lower()
+        endpoint_type_pattern = mapping.get("endpoint_type", "").lower()
+
+        # Check manufacturer match
+        manufacturer_match = False
+        if manufacturer_pattern:
+            try:
+                if re.search(manufacturer_pattern, manufacturer_slug, re.IGNORECASE) or \
+                   re.search(manufacturer_pattern, manufacturer_name, re.IGNORECASE):
+                    manufacturer_match = True
+            except re.error:
+                if manufacturer_pattern in manufacturer_slug or manufacturer_pattern in manufacturer_name:
+                    manufacturer_match = True
+
+        if not manufacturer_match:
+            continue
+
+        # Check endpoint_type match if specified
+        if endpoint_type_pattern:
+            endpoint_type_match = False
+            try:
+                if re.search(endpoint_type_pattern, endpoint_type_slug, re.IGNORECASE) or \
+                   re.search(endpoint_type_pattern, endpoint_type_model, re.IGNORECASE):
+                    endpoint_type_match = True
+            except re.error:
+                if endpoint_type_pattern in endpoint_type_slug or endpoint_type_pattern in endpoint_type_model:
+                    endpoint_type_match = True
+
+            if not endpoint_type_match:
+                continue
+
+        # Mapping matches
+        return True
+
+    return False
+
+
+# Endpoint views - only available if netbox_endpoints is installed
+if ENDPOINTS_PLUGIN_INSTALLED:
+
+    class EndpointISEContentView(LoginRequiredMixin, PermissionRequiredMixin, View):
+        """HTMX endpoint that returns ISE content for netbox Endpoint async loading."""
+
+        permission_required = "netbox_endpoints.view_endpoint"
+
+        def get(self, request, pk):
+            """Fetch ISE data and return HTML content."""
+            endpoint = Endpoint.objects.select_related("endpoint_type__manufacturer").get(pk=pk)
+
+            client = get_client()
+            config = settings.PLUGINS_CONFIG.get("netbox_cisco_ise", {})
+
+            ise_data = {}
+            session_data = {}
+            error = None
+
+            if not client:
+                error = "Cisco ISE not configured. Configure the plugin in NetBox settings."
+            elif not endpoint.mac_address:
+                error = "No MAC address configured for this endpoint."
+            else:
+                # Endpoint lookup by MAC address
+                mac_address = str(endpoint.mac_address)
+                ise_data = client.get_endpoint_by_mac(mac_address)
+                if "error" not in ise_data:
+                    # Also get session data for connected endpoints
+                    session_data = client.get_active_session_by_mac(mac_address)
+                    if "error" in session_data and session_data.get("connected") is False:
+                        # Not connected is fine, just no active session
+                        pass
+                else:
+                    error = ise_data.get("error")
+                    ise_data = {}
+
+            # Get ISE URL for external links
+            ise_url = config.get("ise_url", "").rstrip("/")
+
+            return HttpResponse(
+                render_to_string(
+                    "netbox_cisco_ise/endpoint_tab_content.html",
+                    {
+                        "object": endpoint,
+                        "ise_data": ise_data,
+                        "session_data": session_data,
+                        "error": error,
+                        "ise_url": ise_url,
+                    },
+                    request=request,
+                )
+            )
