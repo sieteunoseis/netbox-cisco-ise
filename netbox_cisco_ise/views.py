@@ -136,7 +136,7 @@ class DeviceISEView(generic.ObjectView):
 
     tab = ViewTab(
         label="Cisco ISE",
-        weight=9001,
+        weight=9002,
         permission="dcim.view_device",
         hide_if_empty=False,
         visible=should_show_ise_tab,

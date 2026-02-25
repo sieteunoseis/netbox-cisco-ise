@@ -9,7 +9,7 @@ import logging
 
 from netbox.plugins import PluginConfig
 
-__version__ = "0.1.8"
+__version__ = "0.1.9"
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +18,10 @@ class CiscoISEConfig(PluginConfig):
     """Plugin configuration for NetBox Cisco ISE integration."""
 
     name = "netbox_cisco_ise"
-    verbose_name = "Cisco ISE"
+    verbose_name = "NetBox Cisco ISE"
     description = "Display Cisco ISE endpoint and NAD information in device pages"
     version = __version__
-    author = "sieteunoseis"
+    author = "Jeremy Worden"
     author_email = "jeremy.worden@gmail.com"
     base_url = "cisco-ise"
     min_version = "4.0.0"
@@ -109,7 +109,7 @@ class CiscoISEConfig(PluginConfig):
 
                 tab = ViewTab(
                     label="Cisco ISE",
-                    weight=9001,
+                    weight=9002,
                     permission="netbox_endpoints.view_endpoint",
                     hide_if_empty=False,
                     visible=should_show_ise_tab_endpoint,
