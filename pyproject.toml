@@ -32,6 +32,7 @@ Homepage = "https://github.com/sieteunoseis/netbox-cisco-ise"
 Repository = "https://github.com/sieteunoseis/netbox-cisco-ise"
 Issues = "https://github.com/sieteunoseis/netbox-cisco-ise/issues"
 Documentation = "https://github.com/sieteunoseis/netbox-cisco-ise/wiki"
+Changelog = "https://github.com/sieteunoseis/netbox-cisco-ise/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [

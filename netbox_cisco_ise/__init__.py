@@ -25,7 +25,7 @@ class CiscoISEConfig(PluginConfig):
     author_email = "jeremy.worden@gmail.com"
     base_url = "cisco-ise"
     min_version = "4.0.0"
-    max_version = "4.99"
+    max_version = "5.99"
 
     # Required settings - plugin won't load without these
     required_settings = []
