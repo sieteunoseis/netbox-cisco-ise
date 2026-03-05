@@ -14,9 +14,7 @@ class Migration(migrations.Migration):
             options={
                 "managed": False,
                 "default_permissions": (),
-                "permissions": (
-                    ("configure_ciscoise", "Can configure Cisco ISE plugin settings"),
-                ),
+                "permissions": (("configure_ciscoise", "Can configure Cisco ISE plugin settings"),),
             },
         ),
     ]
