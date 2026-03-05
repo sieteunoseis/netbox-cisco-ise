@@ -241,9 +241,10 @@ class DeviceISEContentView(LoginRequiredMixin, PermissionRequiredMixin, View):
         )
 
 
-class ISESettingsView(View):
+class ISESettingsView(LoginRequiredMixin, PermissionRequiredMixin, View):
     """View for displaying ISE plugin settings."""
 
+    permission_required = "netbox_cisco_ise.configure_ciscoise"
     template_name = "netbox_cisco_ise/settings.html"
 
     def get(self, request):
