@@ -9,7 +9,7 @@ import logging
 
 from netbox.plugins import PluginConfig
 
-__version__ = "0.1.11"
+__version__ = "0.2.0"
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class CiscoISEConfig(PluginConfig):
     """Plugin configuration for NetBox Cisco ISE integration."""
 
     name = "netbox_cisco_ise"
-    verbose_name = "NetBox Cisco ISE"
+    verbose_name = "Cisco ISE"
     description = "Display Cisco ISE endpoint and NAD information in device pages"
     version = __version__
     author = "Jeremy Worden"
@@ -32,6 +32,8 @@ class CiscoISEConfig(PluginConfig):
 
     # Default configuration values
     default_settings = {
+        "top_level_menu": True,
+        "tab_weight": 9002,
         # ISE Connection Settings
         "ise_url": "",  # e.g., "https://ise.example.com"
         "ise_username": "",  # ERS Admin username
@@ -98,7 +100,7 @@ class CiscoISEConfig(PluginConfig):
             from netbox_endpoints.models import Endpoint
             from utilities.views import ViewTab, register_model_view
 
-            from .views import should_show_ise_tab_endpoint
+            from .views import TAB_WEIGHT, should_show_ise_tab_endpoint
 
             @register_model_view(Endpoint, name="cisco_ise", path="cisco-ise")
             class EndpointISEView(generic.ObjectView):
@@ -109,7 +111,7 @@ class CiscoISEConfig(PluginConfig):
 
                 tab = ViewTab(
                     label="Cisco ISE",
-                    weight=9002,
+                    weight=TAB_WEIGHT,
                     permission="netbox_endpoints.view_endpoint",
                     hide_if_empty=False,
                     visible=should_show_ise_tab_endpoint,

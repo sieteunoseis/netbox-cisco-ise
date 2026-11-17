@@ -19,6 +19,9 @@ from utilities.views import ViewTab, register_model_view
 
 from .ise_client import get_client
 
+# Tab order on object pages; override with PLUGINS_CONFIG["netbox_cisco_ise"]["tab_weight"]
+TAB_WEIGHT = settings.PLUGINS_CONFIG.get("netbox_cisco_ise", {}).get("tab_weight", 9002)
+
 # Check if netbox_endpoints plugin is installed
 try:
     from netbox_endpoints.models import Endpoint
@@ -136,7 +139,7 @@ class DeviceISEView(generic.ObjectView):
 
     tab = ViewTab(
         label="Cisco ISE",
-        weight=9002,
+        weight=TAB_WEIGHT,
         permission="dcim.view_device",
         hide_if_empty=False,
         visible=should_show_ise_tab,

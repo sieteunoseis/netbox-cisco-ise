@@ -120,6 +120,15 @@ PLUGINS_CONFIG = {
 }
 ```
 
+### Display Options
+
+Optional `PLUGINS_CONFIG["netbox_cisco_ise"]` keys that control where the plugin appears in the UI:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `tab_weight` | `9002` | Position of this plugin's tab on object pages (lower = further left). Tabs with equal weight fall back to registration order. |
+| `top_level_menu` | `True` | `True` = own top-level sidebar menu. `False` = items listed under the shared **Plugins** menu, to shorten the sidebar. |
+
 ### ISE ERS API Setup
 
 1. Enable ERS API in ISE: **Administration > System > Settings > ERS Settings**
